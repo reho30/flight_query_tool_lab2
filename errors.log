@@ -1,0 +1,12 @@
+2026-11-23 21:22:03 WARNING db.csv:12: WRONG_FIELD_COUNT | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:13: INVALID_FLIGHT_ID | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:14: ARRIVAL_NOT_AFTER_DEPARTURE | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:15: INVALID_ORIGIN | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:16: INVALID_DEPARTURE | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:17: MISSING_FIELD | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:18: NON_POSITIVE_PRICE | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:19: INVALID_FLIGHT_ID | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:20: INVALID_DEPARTURE | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:21: SAME_ORIGIN_DESTINATION | Invalid flight data
+2026-11-23 21:22:03 WARNING db.csv:22: DUPLICATE_FLIGHT | Duplicate flight ID and departure datetime
+2026-11-23 21:22:03 WARNING db.csv:23: INVALID_PRICE | Invalid flight data
