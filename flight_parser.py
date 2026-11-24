@@ -1,8 +1,5 @@
-"""Flight Schedule Parser and Query Tool - command-line entry point.
 
-Run from the project folder, for example:
-    python flight_parser.py -i data/db.csv -a data/airports.txt
-"""
+"""Flight Schedule Parser and Query Tool - command-line entry point."""
 
 import argparse
 import json
@@ -16,7 +13,6 @@ from query import run_queries
 from validator import load_airports
 
 
-# TODO: fill in your details: plain ASCII, no spaces or underscores.
 STUDENT_ID = "251ADB236"
 FIRST_NAME = "Rahman"
 LAST_NAME = "Gasimov"
@@ -30,44 +26,18 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("-i", "--input", help="Input CSV file")
+    source.add_argument("-d", "--directory", help="Directory containing CSV files")
+    source.add_argument("-j", "--json", help="Existing JSON database")
 
-    source.add_argument(
-        "-i",
-        "--input",
-        help="Input CSV file",
-    )
-
-    source.add_argument(
-        "-d",
-        "--directory",
-        help="Directory containing CSV files",
-    )
-
-    source.add_argument(
-        "-j",
-        "--json",
-        help="Existing JSON database",
-    )
-
-    parser.add_argument(
-        "-a",
-        "--airports",
-        help="Airport codes file",
-    )
-
+    parser.add_argument("-a", "--airports", help="Airport codes file")
     parser.add_argument(
         "-o",
         "--output",
         default="db.json",
         help="Output database JSON file (default: db.json)",
     )
-
-    parser.add_argument(
-        "-q",
-        "--query",
-        help="Query JSON file",
-    )
-
+    parser.add_argument("-q", "--query", help="Query JSON file")
     parser.add_argument(
         "-r",
         "--response",
@@ -79,7 +49,7 @@ def create_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run the whole program and return the exit code (0, 1 or 2)."""
+    """Run the program and return an exit code."""
 
     parser = create_parser()
 
@@ -88,7 +58,6 @@ def main(argv: list[str] | None = None) -> int:
     except SystemExit as exc:
         return exc.code
 
-    # Usage errors
     if args.input and not args.airports:
         print("Error: -a is required when using -i", file=sys.stderr)
         return 2
@@ -102,8 +71,6 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     records = []
-    errors = []
-
     logger = logging.getLogger("flight_parser")
     logger.setLevel(logging.INFO)
     logger.propagate = False
@@ -111,20 +78,15 @@ def main(argv: list[str] | None = None) -> int:
     handler = None
 
     try:
-        # CSV input mode
         if args.input or args.directory:
-
-            # Load airport codes
             try:
                 airports = load_airports(args.airports)
             except (OSError, UnicodeError) as exc:
                 print(f"Error: Could not read airport file: {exc}", file=sys.stderr)
                 return 1
 
-            # Determine input CSV files
             if args.input:
                 paths = [args.input]
-
             else:
                 try:
                     if not os.path.isdir(args.directory):
@@ -154,9 +116,13 @@ def main(argv: list[str] | None = None) -> int:
                     )
                     return 1
 
-            # Set up errors.log
-            handler = logging.FileHandler(
+            log_path = os.path.join(
+                os.path.dirname(os.path.abspath(args.output)),
                 "errors.log",
+            )
+
+            handler = logging.FileHandler(
+                log_path,
                 mode="w",
                 encoding="utf-8",
             )
@@ -169,14 +135,11 @@ def main(argv: list[str] | None = None) -> int:
             handler.setFormatter(formatter)
             logger.addHandler(handler)
 
-            # Parse CSV files
             records, errors = parse_files(paths, airports)
 
-            # Log invalid rows
             for error in errors:
                 logger.warning(error)
 
-            # Check for file-reading errors
             file_errors = [
                 error for error in errors
                 if ":0: FILE_ERROR" in error
@@ -185,10 +148,8 @@ def main(argv: list[str] | None = None) -> int:
             if file_errors:
                 for error in file_errors:
                     print(f"Error: {error}", file=sys.stderr)
-
                 return 1
 
-            # Write database JSON
             try:
                 with open(args.output, "w", encoding="utf-8") as file:
                     json.dump(records, file, indent=4)
@@ -200,9 +161,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 return 1
 
-        # Existing JSON database mode
         elif args.json:
-
             try:
                 with open(args.json, "r", encoding="utf-8") as file:
                     records = json.load(file)
@@ -228,9 +187,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 return 1
 
-        # Query mode
         if args.query:
-
             try:
                 with open(args.query, "r", encoding="utf-8") as file:
                     queries = json.load(file)
@@ -248,7 +205,6 @@ def main(argv: list[str] | None = None) -> int:
 
             responses = run_queries(records, queries)
 
-            # Create response filename
             timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 
             response_filename = (
@@ -275,7 +231,6 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     finally:
-        # Always remove and close the logging handler.
         if handler is not None:
             logger.removeHandler(handler)
             handler.close()
